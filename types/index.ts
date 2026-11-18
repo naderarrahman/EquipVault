@@ -52,28 +52,6 @@ export interface EquipmentFormValues {
   terms: string
 }
 
-export interface Equipment {
-  _id: string
-  name: string
-  description: string
-  category: EquipmentCategory
-  location: string
-  rentalPrice: number
-  rentalType: RentalType
-  availableQuantity: number
-  condition: string
-  brand: string
-  model: string
-  image: string
-  terms: string
-  status: EquipmentStatus
-  ownerId: string
-  ownerName: string
-  ownerEmail: string
-  createdAt: string
-  updatedAt?: string
-}
-
 export interface CreateEquipmentPayload {
   name: string
   description: string
@@ -87,4 +65,21 @@ export interface CreateEquipmentPayload {
   model: string
   image: string
   terms: string
+}
+
+export interface Equipment extends CreateEquipmentPayload {
+  _id: string
+  status: EquipmentStatus | string
+  ownerId: string
+  ownerName?: string
+  ownerEmail?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface ApiResponse<T> {
+  success: boolean
+  message?: string
+  count?: number
+  data?: T
 }
