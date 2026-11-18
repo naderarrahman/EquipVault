@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 import ThemeToggle from "../shared/ThemeToggle"
+import type { UserRole } from "@/types"
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -36,8 +37,7 @@ export default function Navbar() {
   // Live session state from Better Auth
   const { data: session, isPending } = authClient.useSession()
   const user = session?.user
-  const userRole =
-    ((user as Record<string, unknown> | undefined)?.role as string | undefined) || "customer"
+  const userRole: UserRole = (user?.role as UserRole | undefined) || "customer"
 
   // Close avatar dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -61,6 +61,10 @@ export default function Navbar() {
     }
   }, [])
 
+  if (pathname.startsWith("/dashboard")) {
+    return null
+  }
+
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true)
@@ -77,7 +81,6 @@ export default function Navbar() {
     }
   }
 
-  // Fallback initials if user has no profile picture
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : "U"
 
   return (
@@ -209,7 +212,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              /* Refined Guest Auth Buttons */
+              /* Guest Auth Buttons */
               <div className="flex items-center gap-2.5">
                 <Link
                   href="/sign-in"
