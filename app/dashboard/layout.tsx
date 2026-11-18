@@ -16,11 +16,14 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const { data: session } = authClient.useSession()
 
-  const inferredRole: UserRole = pathname.startsWith("/dashboard/admin")
+  const fallbackRole: UserRole = pathname.startsWith("/dashboard/admin")
     ? "admin"
     : pathname.startsWith("/dashboard/owner")
       ? "owner"
       : "customer"
+
+  const activeRole: UserRole =
+    (session?.user?.role as UserRole | undefined) || fallbackRole
 
   const user = session?.user || {
     name: "Preview User",
@@ -29,14 +32,18 @@ export default function DashboardLayout({
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar role={inferredRole} user={user} />
-      <SidebarInset className="flex flex-col min-h-screen bg-background">
-        <DashboardHeader role={inferredRole} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="min-h-screen w-full flex justify-center bg-muted/40 dark:bg-background">
+      <div className="w-full max-w-[1536px] min-h-screen border-x border-border/70 bg-background shadow-md">
+        <SidebarProvider className="min-h-screen w-full">
+          <AppSidebar role={activeRole} user={user} />
+          <SidebarInset className="flex flex-col min-h-screen bg-muted/20 dark:bg-background overflow-hidden">
+            <DashboardHeader role={activeRole} />
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
+              {children}
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
+      </div>
+    </div>
   )
 }

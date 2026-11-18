@@ -1,6 +1,18 @@
 export type UserRole = "customer" | "owner" | "admin"
 export type SignupRole = "customer" | "owner"
 
+export type EquipmentCategory =
+  | "Construction Equipment"
+  | "Photography Equipment"
+  | "Vehicles & Transportation"
+  | "Agriculture Equipment"
+  | "Electronics"
+  | "Event Equipment"
+
+export type RentalType = "Daily" | "Weekly" | "Monthly"
+
+export type EquipmentStatus = "pending" | "approved" | "rejected"
+
 export interface UserProfile {
   id: string
   name: string
@@ -23,4 +35,56 @@ export interface SignUpFormValues {
 export interface SignInFormValues {
   email: string
   password: string
+}
+
+export interface EquipmentFormValues {
+  name: string
+  description: string
+  category: EquipmentCategory
+  location: string
+  rentalPrice: string
+  rentalType: RentalType
+  availableQuantity: string
+  condition: string
+  brand: string
+  model: string
+  imageUrl: string
+  terms: string
+}
+
+export interface Equipment {
+  _id: string
+  name: string
+  description: string
+  category: EquipmentCategory
+  location: string
+  rentalPrice: number
+  rentalType: RentalType
+  availableQuantity: number
+  condition: string
+  brand: string
+  model: string
+  image: string
+  terms: string
+  status: EquipmentStatus
+  ownerId: string
+  ownerName: string
+  ownerEmail: string
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface CreateEquipmentPayload {
+  name: string
+  description: string
+  category: EquipmentCategory
+  location: string
+  rentalPrice: number
+  rentalType: RentalType
+  availableQuantity: number
+  condition: string
+  brand: string
+  model: string
+  image: string
+  terms: string
 }
