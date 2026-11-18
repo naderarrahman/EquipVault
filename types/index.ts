@@ -83,3 +83,18 @@ export interface ApiResponse<T> {
   count?: number
   data?: T
 }
+
+export type EquipmentSortOption = "recent" | "price-asc" | "price-desc"
+
+export type EquipmentAvailabilityFilter = "all" | "available" | "unavailable"
+
+export interface EquipmentFilterParams {
+  search?: string
+  category?: string
+  rentalType?: string
+  minPrice?: string
+  maxPrice?: string
+  availability?: EquipmentAvailabilityFilter
+  sort?: EquipmentSortOption
+  status?: string
+}

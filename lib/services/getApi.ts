@@ -1,7 +1,69 @@
 import { authFetch } from "@/lib/api"
+import { ApiResponse, Equipment, EquipmentFilterParams } from "@/types"
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 
 export const getOwnerEquipmentApi = async () => {
   const res = await authFetch("/api/equipment/my-equipment")
   return res.json()
+}
+
+// Public marketplace equipment with backend search, filter & sort
+export const getAllEquipmentApi = async (
+  params?: EquipmentFilterParams
+): Promise<ApiResponse<Equipment[]>> => {
+  try {
+    const query = new URLSearchParams()
+
+    if (params?.search?.trim()) {
+      query.set("search", params.search.trim())
+    }
+    if (params?.category && params.category !== "All") {
+      query.set("category", params.category)
+    }
+    if (params?.rentalType && params.rentalType !== "All") {
+      query.set("rentalType", params.rentalType)
+    }
+    if (params?.minPrice && params.minPrice.trim() !== "") {
+      query.set("minPrice", params.minPrice.trim())
+    }
+    if (params?.maxPrice && params.maxPrice.trim() !== "") {
+      query.set("maxPrice", params.maxPrice.trim())
+    }
+    if (params?.availability && params.availability !== "all") {
+      query.set("availability", params.availability)
+    }
+    if (params?.sort) {
+      query.set("sort", params.sort)
+    }
+    if (params?.status) {
+      query.set("status", params.status)
+    }
+
+    const queryString = query.toString()
+    const url = `${API_BASE_URL}/api/equipment${queryString ? `?${queryString}` : ""}`
+
+    const res = await fetch(url, {
+      cache: "no-store",
+    })
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: "Failed to fetch equipment list.",
+        data: [],
+      }
+    }
+
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching all equipment:", error)
+    return {
+      success: false,
+      message: "Network error while fetching equipment.",
+      data: [],
+    }
+  }
 }
 
