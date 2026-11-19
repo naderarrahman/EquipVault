@@ -139,3 +139,51 @@ export interface FavoriteToggleResponse {
   isFavorite: boolean
   message: string
 }
+
+export interface BookingRecord extends CreateBookingPayload {
+  _id: string
+  equipmentName: string
+  equipmentImage: string
+  rentalType: RentalType
+  unitPrice: number
+  ownerId: string
+  ownerName: string
+  ownerEmail: string
+  customerId: string
+  customerName: string
+  customerEmail: string
+  durationDays: number
+  billingUnits: number
+  totalAmount: number
+  bookingStatus: BookingStatus
+  paymentStatus: PaymentStatus
+  transactionId?: string
+  paidAt?: string
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface PaymentRecord {
+  _id: string
+  bookingId: string
+  equipmentId: string
+  equipmentName: string
+  customerId: string
+  customerName: string
+  customerEmail: string
+  ownerId: string
+  ownerName: string
+  amount: number
+  currency: string
+  transactionId: string
+  stripeSessionId: string
+  status: "succeeded" | "pending" | "failed"
+  createdAt: string
+}
+
+export interface CheckoutSessionResponse {
+  success: boolean
+  url?: string
+  sessionId?: string
+  message?: string
+}

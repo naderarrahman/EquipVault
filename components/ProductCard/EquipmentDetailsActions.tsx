@@ -17,6 +17,7 @@ import {
   createBookingAction,
   toggleFavoriteAction,
 } from "@/actions/equipment.actions"
+import { createCheckoutSessionAction } from "@/actions/payment.actions"
 import type { Equipment } from "@/types"
 
 interface EquipmentDetailsActionsProps {
@@ -144,22 +145,37 @@ export default function EquipmentDetailsActions({
 
       if (!response.success) {
         toast.error(response.message || "Booking failed.")
+        setIsSubmittingBooking(false)
         return
       }
 
-      toast.success(
-        `Booking request submitted ($${pricingSummary.totalAmount})!`
-      )
-      setIsModalOpen(false)
-      setStartDate("")
-      setEndDate("")
-      setRequiredQuantity("1")
-      setContactNumber("")
-      setDeliveryAddress("")
-      setAdditionalNotes("")
+      const createdBookingId = response.bookingId || response.data?._id
+
+      if (!createdBookingId) {
+        toast.error("Booking created, but missing booking ID for payment.")
+        setIsSubmittingBooking(false)
+        return
+      }
+
+      toast.loading("Redirecting to Stripe Checkout...")
+
+      const checkoutRes = await createCheckoutSessionAction(createdBookingId)
+
+      if (!checkoutRes.success || !checkoutRes.url) {
+        toast.dismiss()
+        toast.error(
+          checkoutRes.message ||
+            "Booking saved, but failed to launch Stripe Checkout. You can pay from My Bookings."
+        )
+        setIsModalOpen(false)
+        setIsSubmittingBooking(false)
+        return
+      }
+
+      window.location.href = checkoutRes.url
     } catch {
+      toast.dismiss()
       toast.error("Failed to process booking request.")
-    } finally {
       setIsSubmittingBooking(false)
     }
   }
@@ -369,10 +385,10 @@ export default function EquipmentDetailsActions({
                   {isSubmittingBooking ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      Confirming...
+                      Processing...
                     </>
                   ) : (
-                    "Confirm Booking"
+                    "Confirm & Pay with Stripe"
                   )}
                 </button>
               </div>

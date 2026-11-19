@@ -22,9 +22,11 @@ import {
   AlertTriangle,
   X,
   ExternalLink,
+  CreditCard,
 } from "lucide-react"
 import { toast } from "sonner"
 import { cancelMyBookingAction } from "@/actions/booking.actions"
+import { createCheckoutSessionAction } from "@/actions/payment.actions"
 import type { BookingRecord, BookingStatus } from "@/types"
 
 interface CustomerBookingsManagerProps {
@@ -49,6 +51,7 @@ export default function CustomerBookingsManager({
   const [searchQuery, setSearchQuery] = useState("")
   const [cancelTarget, setCancelTarget] = useState<BookingRecord | null>(null)
   const [isCancelling, setIsCancelling] = useState(false)
+  const [payingBookingId, setPayingBookingId] = useState<string | null>(null)
 
   // Summary metrics
   const stats = useMemo(() => {
@@ -81,6 +84,40 @@ export default function CustomerBookingsManager({
       return matchesTab && matchesSearch
     })
   }, [bookings, activeTab, searchQuery])
+
+  const handlePayNow = async (bookingId: string) => {
+    try {
+      setPayingBookingId(bookingId)
+      const checkoutRes = await createCheckoutSessionAction(bookingId)
+
+      if (!checkoutRes.success || !checkoutRes.url) {
+        toast.error(checkoutRes.message || "Could not start Stripe payment.")
+        setPayingBookingId(null)
+        return
+      }
+
+      const handlePayNow = async (bookingId: string) => {
+    try {
+      setPayingBookingId(bookingId)
+      const checkoutRes = await createCheckoutSessionAction(bookingId)
+
+      if (!checkoutRes.success || !checkoutRes.url) {
+        toast.error(checkoutRes.message || "Could not start Stripe payment.")
+        setPayingBookingId(null)
+        return
+      }
+
+      window.location.assign(checkoutRes.url)
+    } catch {
+      toast.error("Something went wrong while initiating payment.")
+      setPayingBookingId(null)
+    }
+  }
+    } catch {
+      toast.error("Something went wrong while initiating payment.")
+      setPayingBookingId(null)
+    }
+  }
 
   const handleConfirmCancel = async () => {
     if (!cancelTarget) return
@@ -357,7 +394,7 @@ export default function CustomerBookingsManager({
                   )}
                 </div>
 
-                {/* Right: Total Amount & Cancel Action */}
+                {/* Right: Total Amount, Pay Now & Cancel Action */}
                 <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-border shrink-0">
                   <div className="lg:text-right">
                     <span className="text-[11px] text-muted-foreground block">
@@ -368,16 +405,41 @@ export default function CustomerBookingsManager({
                     </span>
                   </div>
 
-                  {booking.bookingStatus === "pending" && (
-                    <button
-                      type="button"
-                      onClick={() => setCancelTarget(booking)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-destructive/40 bg-destructive/10 hover:bg-destructive hover:text-destructive-foreground text-destructive text-xs font-semibold transition cursor-pointer"
-                    >
-                      <XCircle className="size-3.5" />
-                      Cancel Request
-                    </button>
-                  )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {booking.paymentStatus === "unpaid" &&
+                      booking.bookingStatus !== "cancelled" &&
+                      booking.bookingStatus !== "rejected" && (
+                        <button
+                          type="button"
+                          disabled={payingBookingId === booking._id}
+                          onClick={() => handlePayNow(booking._id)}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold transition disabled:opacity-60 cursor-pointer shadow-2xs"
+                        >
+                          {payingBookingId === booking._id ? (
+                            <>
+                              <Loader2 className="size-3.5 animate-spin" />
+                              Redirecting...
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard className="size-3.5" />
+                              Pay Now
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                    {booking.bookingStatus === "pending" && (
+                      <button
+                        type="button"
+                        onClick={() => setCancelTarget(booking)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-destructive/40 bg-destructive/10 hover:bg-destructive hover:text-destructive-foreground text-destructive text-xs font-semibold transition cursor-pointer"
+                      >
+                        <XCircle className="size-3.5" />
+                        Cancel Request
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
