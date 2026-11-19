@@ -34,3 +34,28 @@ export async function updateBookingStatusAction(
     }
   }
 }
+
+export async function cancelMyBookingAction(
+  bookingId: string
+): Promise<ApiResponse<null>> {
+  try {
+    const res = await authFetch(`/api/bookings/${bookingId}/cancel`, {
+      method: "PATCH",
+    })
+
+    const data: ApiResponse<null> = await res.json()
+
+    if (data.success) {
+      revalidatePath("/dashboard/customer/bookings")
+      revalidatePath("/dashboard/owner/bookings")
+    }
+
+    return data
+  } catch (error) {
+    console.error("Cancel Booking Error:", error)
+    return {
+      success: false,
+      message: "Failed to cancel booking request.",
+    }
+  }
+}

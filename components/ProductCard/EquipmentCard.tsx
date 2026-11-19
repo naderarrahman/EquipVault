@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { MapPin, CheckCircle2, Clock, Eye, Edit3 } from "lucide-react"
 import DeleteEquipmentButton from "./DeleteEquipmentButton"
+import RemoveFavoriteButton from "./RemoveFavoriteButton"
 import type { Equipment } from "@/types"
 
 interface EquipmentCardProps {
@@ -10,6 +11,7 @@ interface EquipmentCardProps {
   detailsHref?: string
   editHref?: string
   showDelete?: boolean
+  showUnfavorite?: boolean
 }
 
 export default function EquipmentCard({
@@ -18,6 +20,7 @@ export default function EquipmentCard({
   detailsHref,
   editHref,
   showDelete = false,
+  showUnfavorite = false,
 }: EquipmentCardProps) {
   const isApproved = item.status?.toLowerCase() === "approved"
   const viewLink = detailsHref || `/equipment/${item._id}`
@@ -39,7 +42,6 @@ export default function EquipmentCard({
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-60" />
 
-          {/* Status Badge */}
           {showStatus && item.status && (
             <span
               className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider backdrop-blur-md flex items-center gap-1.5 shadow-xs ${
@@ -57,7 +59,6 @@ export default function EquipmentCard({
             </span>
           )}
 
-          {/* Category Tag */}
           <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-background/80 backdrop-blur-md text-foreground text-xs font-medium border border-border">
             {item.category}
           </span>
@@ -136,6 +137,13 @@ export default function EquipmentCard({
 
           {showDelete && (
             <DeleteEquipmentButton
+              equipmentId={item._id}
+              equipmentName={item.name}
+            />
+          )}
+
+          {showUnfavorite && (
+            <RemoveFavoriteButton
               equipmentId={item._id}
               equipmentName={item.name}
             />

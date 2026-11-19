@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -48,10 +47,10 @@ const roleNavigationMap: Record<UserRole, { label: string; items: NavItem[] }> =
   customer: {
     label: "Customer Workspace",
     items: [
-      { title: "Overview", href: "/dashboard/user", icon: LayoutDashboard },
-      { title: "My Bookings", href: "/dashboard/user/bookings", icon: CalendarCheck },
-      { title: "Saved Favorites", href: "/dashboard/user/favorites", icon: Heart },
-      { title: "My Profile", href: "/dashboard/user/profile", icon: UserCircle },
+      { title: "Overview", href: "/dashboard/customer", icon: LayoutDashboard },
+      { title: "My Bookings", href: "/dashboard/customer/bookings", icon: CalendarCheck },
+      { title: "Saved Favorites", href: "/dashboard/customer/favorites", icon: Heart },
+      { title: "My Profile", href: "/dashboard/customer/profile", icon: UserCircle },
     ],
   },
   owner: {

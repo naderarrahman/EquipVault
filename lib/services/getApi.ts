@@ -108,3 +108,33 @@ export const getOwnerBookingsApi = async (): Promise<ApiResponse<BookingRecord[]
   }
 }
 
+// Customer: Fetch all saved favorite equipment
+export const getMyFavoritesApi = async (): Promise<ApiResponse<Equipment[]>> => {
+  try {
+    const res = await authFetch("/api/favorites/my-favorites")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching favorite equipment:", error)
+    return {
+      success: false,
+      message: "Failed to load saved favorites.",
+      data: [],
+    }
+  }
+}
+
+// Customer: Fetch logged-in customer's own booking history
+export const getMyBookingsApi = async (): Promise<ApiResponse<BookingRecord[]>> => {
+  try {
+    const res = await authFetch("/api/bookings/my-bookings")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching customer bookings:", error)
+    return {
+      success: false,
+      message: "Failed to load your bookings.",
+      data: [],
+    }
+  }
+}
+

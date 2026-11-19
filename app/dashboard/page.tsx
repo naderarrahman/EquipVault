@@ -7,7 +7,7 @@ import { authClient } from "@/lib/auth-client"
 import type { UserRole } from "@/types"
 
 const roleHomeRoute: Record<UserRole, string> = {
-  customer: "/dashboard/user",
+  customer: "/dashboard/customer",
   owner: "/dashboard/owner",
   admin: "/dashboard/admin",
 }
