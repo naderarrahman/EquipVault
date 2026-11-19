@@ -1,5 +1,5 @@
 import { authFetch } from "@/lib/api"
-import { AdminDashboardStats, AdminUserRecord, ApiResponse, BookingRecord, Equipment, EquipmentFilterParams, PaymentRecord } from "@/types"
+import { AdminDashboardStats, AdminUserRecord, ApiResponse, BookingRecord, CustomerDashboardOverview, Equipment, EquipmentFilterParams, OwnerDashboardOverview, PaymentRecord } from "@/types"
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -212,3 +212,33 @@ export const getAllPaymentsAdminApi = async (): Promise<ApiResponse<PaymentRecor
   }
 }
 
+
+// Owner: Dashboard Overview Data
+export const getOwnerOverviewApi = async (): Promise<
+  ApiResponse<OwnerDashboardOverview>
+> => {
+  try {
+    const res = await authFetch("/api/dashboard/owner-overview")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching owner overview:", error)
+    return {
+      success: false,
+      message: "Failed to load owner dashboard overview.",
+    }
+  }
+}
+
+// Customer: Dashboard Overview Data
+export const getCustomerOverviewApi = async (): Promise<ApiResponse<CustomerDashboardOverview>> => {
+  try {
+    const res = await authFetch("/api/dashboard/customer-overview")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching customer overview:", error)
+    return {
+      success: false,
+      message: "Failed to load customer dashboard overview.",
+    }
+  }
+}

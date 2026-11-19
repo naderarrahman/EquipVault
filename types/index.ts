@@ -223,3 +223,43 @@ export interface AdminDashboardStats {
     transactionsCount: number
   }
 }
+
+
+export interface OwnerDashboardOverview {
+  equipment: {
+    total: number
+    approved: number
+    pending: number
+    rejected: number
+    totalUnitsAvailable: number
+  }
+  bookings: {
+    total: number
+    pending: number
+    approved: number
+    completed: number
+  }
+  revenue: {
+    paidEarnings: number
+    pendingValue: number
+    transactionsCount: number
+  }
+  recentBookings: BookingRecord[]
+  recentEquipment: Equipment[]
+}
+
+export interface CustomerDashboardOverview {
+  bookings: {
+    total: number
+    pending: number
+    active: number
+    completed: number
+  }
+  favoritesCount: number
+  spending: {
+    totalPaid: number
+    unpaidDue: number
+    transactionsCount: number
+  }
+  recentBookings: BookingRecord[]
+}
