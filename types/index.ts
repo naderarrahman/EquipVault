@@ -187,3 +187,39 @@ export interface CheckoutSessionResponse {
   sessionId?: string
   message?: string
 }
+
+
+export type EquipmentApprovalStatus = "pending" | "approved" | "rejected"
+
+export interface AdminUserRecord {
+  _id?: string
+  id?: string
+  name: string
+  email: string
+  role?: UserRole
+  image?: string | null
+  emailVerified?: boolean
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface AdminDashboardStats {
+  users: {
+    total: number
+    owners: number
+    customers: number
+  }
+  equipment: {
+    total: number
+    pending: number
+    approved: number
+  }
+  bookings: {
+    total: number
+    active: number
+  }
+  revenue: {
+    total: number
+    transactionsCount: number
+  }
+}

@@ -1,5 +1,5 @@
 import { authFetch } from "@/lib/api"
-import { ApiResponse, BookingRecord, Equipment, EquipmentFilterParams } from "@/types"
+import { AdminDashboardStats, AdminUserRecord, ApiResponse, BookingRecord, Equipment, EquipmentFilterParams, PaymentRecord } from "@/types"
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -133,6 +133,80 @@ export const getMyBookingsApi = async (): Promise<ApiResponse<BookingRecord[]>> 
     return {
       success: false,
       message: "Failed to load your bookings.",
+      data: [],
+    }
+  }
+}
+
+// Admin: Overview Stats
+export const getAdminStatsApi = async (): Promise<ApiResponse<AdminDashboardStats>> => {
+  try {
+    const res = await authFetch("/api/admin/stats")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching admin stats:", error)
+    return {
+      success: false,
+      message: "Failed to load admin statistics.",
+    }
+  }
+}
+
+// Admin: Get All Users
+export const getAllUsersAdminApi = async (): Promise< ApiResponse<AdminUserRecord[]>> => {
+  try {
+    const res = await authFetch("/api/admin/users")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching all users:", error)
+    return {
+      success: false,
+      message: "Failed to load users list.",
+      data: [],
+    }
+  }
+}
+
+// Admin: Get All Equipment (Pending, Approved, Rejected)
+export const getAllEquipmentAdminApi = async (): Promise<ApiResponse<Equipment[]>> => {
+  try {
+    const res = await authFetch("/api/admin/equipment")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching all admin equipment:", error)
+    return {
+      success: false,
+      message: "Failed to load equipment listings.",
+      data: [],
+    }
+  }
+}
+
+// Admin: Get All Platform Bookings
+export const getAllBookingsAdminApi = async (): Promise<ApiResponse<BookingRecord[]>> => {
+  try {
+    const res = await authFetch("/api/admin/bookings")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching all admin bookings:", error)
+    return {
+      success: false,
+      message: "Failed to load platform bookings.",
+      data: [],
+    }
+  }
+}
+
+// Admin: Get All Platform Stripe Payments
+export const getAllPaymentsAdminApi = async (): Promise<ApiResponse<PaymentRecord[]>> => {
+  try {
+    const res = await authFetch("/api/admin/payments")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching all admin payments:", error)
+    return {
+      success: false,
+      message: "Failed to load payment transactions.",
       data: [],
     }
   }
