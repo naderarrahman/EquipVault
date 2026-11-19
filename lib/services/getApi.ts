@@ -1,5 +1,5 @@
 import { authFetch } from "@/lib/api"
-import { ApiResponse, Equipment, EquipmentFilterParams } from "@/types"
+import { ApiResponse, BookingRecord, Equipment, EquipmentFilterParams } from "@/types"
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -79,6 +79,31 @@ export const getSingleEquipmentApi = async (
     return {
       success: false,
       message: "Failed to load equipment details.",
+    }
+  }
+}
+
+export const checkFavoriteApi = async (
+  equipmentId: string
+): Promise<{ success: boolean; isFavorite: boolean }> => {
+  try {
+    const res = await authFetch(`/api/favorites/check/${equipmentId}`)
+    return await res.json()
+  } catch {
+    return { success: false, isFavorite: false }
+  }
+}
+
+export const getOwnerBookingsApi = async (): Promise<ApiResponse<BookingRecord[]>> => {
+  try {
+    const res = await authFetch("/api/bookings/owner")
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching owner bookings:", error)
+    return {
+      success: false,
+      message: "Failed to load rental requests.",
+      data: [],
     }
   }
 }

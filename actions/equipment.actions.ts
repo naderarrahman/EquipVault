@@ -4,8 +4,11 @@ import { revalidatePath } from "next/cache"
 import { authFetch } from "@/lib/api"
 import type {
   ApiResponse,
+  BookingRecord,
+  CreateBookingPayload,
   CreateEquipmentPayload,
   Equipment,
+  FavoriteToggleResponse,
 } from "@/types"
 
 export async function postEquipmentAction(
@@ -65,5 +68,50 @@ export async function deleteEquipmentAction(
   } catch (error) {
     console.error("Server Action Error (DELETE):", error)
     return { success: false, message: "Failed to delete equipment on server." }
+  }
+}
+
+export async function toggleFavoriteAction(
+  equipmentId: string
+): Promise<FavoriteToggleResponse> {
+  try {
+    const res = await authFetch("/api/favorites/toggle", {
+      method: "POST",
+      body: JSON.stringify({ equipmentId }),
+    })
+    const data: FavoriteToggleResponse = await res.json()
+    if (data.success) {
+      revalidatePath(`/equipment/${equipmentId}`)
+      revalidatePath("/dashboard/customer/favorites")
+    }
+    return data
+  } catch (error) {
+    console.error("Toggle Favorite Error:", error)
+    return {
+      success: false,
+      isFavorite: false,
+      message: "Failed to update favorite.",
+    }
+  }
+}
+
+export async function createBookingAction(
+  payload: CreateBookingPayload
+): Promise<ApiResponse<BookingRecord> & { bookingId?: string }> {
+  try {
+    const res = await authFetch("/api/bookings", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    })
+    const data: ApiResponse<BookingRecord> & { bookingId?: string } =
+      await res.json()
+    if (data.success) {
+      revalidatePath("/dashboard/customer/bookings")
+      revalidatePath("/dashboard/owner/bookings")
+    }
+    return data
+  } catch (error) {
+    console.error("Create Booking Error:", error)
+    return { success: false, message: "Failed to submit booking request." }
   }
 }

@@ -80,6 +80,7 @@ export default async function MyEquipmentPage() {
               key={item._id}
               item={item}
               showStatus={true}
+              detailsHref={`/dashboard/owner/my-equipment/${item._id}`}
               editHref={`/dashboard/owner/edit-equipment/${item._id}`}
               showDelete={true}
             />

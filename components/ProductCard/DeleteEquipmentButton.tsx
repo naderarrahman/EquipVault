@@ -9,11 +9,15 @@ import { deleteEquipmentAction } from "@/actions/equipment.actions"
 interface DeleteEquipmentButtonProps {
   equipmentId: string
   equipmentName: string
+  redirectTo?: string
+  showLabel?: boolean
 }
 
 export default function DeleteEquipmentButton({
   equipmentId,
   equipmentName,
+  redirectTo,
+  showLabel = false,
 }: DeleteEquipmentButtonProps) {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
@@ -31,6 +35,10 @@ export default function DeleteEquipmentButton({
 
       toast.success("Equipment deleted successfully.")
       setIsOpen(false)
+
+      if (redirectTo) {
+        router.push(redirectTo)
+      }
       router.refresh()
     } catch {
       toast.error("Something went wrong while deleting.")
@@ -45,14 +53,17 @@ export default function DeleteEquipmentButton({
         type="button"
         onClick={() => setIsOpen(true)}
         title="Delete Listing"
-        className="p-2 rounded-xl border border-border bg-background hover:bg-destructive/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive transition cursor-pointer"
+        className={`inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background hover:bg-destructive/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive transition cursor-pointer ${
+          showLabel ? "px-4 py-2.5 text-sm font-semibold w-full" : "p-2"
+        }`}
       >
         <Trash2 className="size-4" />
+        {showLabel && <span>Delete Listing</span>}
       </button>
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6 shadow-xl space-y-5">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6 shadow-xl space-y-5 text-left">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center shrink-0">

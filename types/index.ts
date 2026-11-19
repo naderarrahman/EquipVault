@@ -98,3 +98,44 @@ export interface EquipmentFilterParams {
   sort?: EquipmentSortOption
   status?: string
 }
+
+export type BookingStatus = "pending" | "approved" | "rejected" | "completed" | "cancelled"
+
+export type PaymentStatus = "unpaid" | "paid"
+
+export interface CreateBookingPayload {
+  equipmentId: string
+  startDate: string
+  endDate: string
+  requiredQuantity: number
+  contactNumber: string
+  deliveryAddress: string
+  additionalNotes: string
+}
+
+export interface BookingRecord extends CreateBookingPayload {
+  _id: string
+  equipmentName: string
+  equipmentImage: string
+  rentalType: RentalType
+  unitPrice: number
+  ownerId: string
+  ownerName: string
+  ownerEmail: string
+  customerId: string
+  customerName: string
+  customerEmail: string
+  durationDays: number
+  billingUnits: number
+  totalAmount: number
+  bookingStatus: BookingStatus
+  paymentStatus: PaymentStatus
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface FavoriteToggleResponse {
+  success: boolean
+  isFavorite: boolean
+  message: string
+}

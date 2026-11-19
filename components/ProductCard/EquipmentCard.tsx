@@ -7,6 +7,7 @@ import type { Equipment } from "@/types"
 interface EquipmentCardProps {
   item: Equipment
   showStatus?: boolean
+  detailsHref?: string
   editHref?: string
   showDelete?: boolean
 }
@@ -14,10 +15,12 @@ interface EquipmentCardProps {
 export default function EquipmentCard({
   item,
   showStatus = false,
+  detailsHref,
   editHref,
   showDelete = false,
 }: EquipmentCardProps) {
   const isApproved = item.status?.toLowerCase() === "approved"
+  const viewLink = detailsHref || `/equipment/${item._id}`
 
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-2xs flex flex-col justify-between hover:border-primary/50 transition duration-300 group">
@@ -72,9 +75,11 @@ export default function EquipmentCard({
             </span>
           </div>
 
-          <h3 className="font-semibold text-foreground text-base line-clamp-1 group-hover:text-primary transition">
-            {item.name}
-          </h3>
+          <Link href={viewLink}>
+            <h3 className="font-semibold text-foreground text-base line-clamp-1 group-hover:text-primary transition">
+              {item.name}
+            </h3>
+          </Link>
 
           <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
             {item.description}
@@ -112,7 +117,7 @@ export default function EquipmentCard({
 
         <div className="flex items-center gap-2">
           <Link
-            href={`/equipment/${item._id}`}
+            href={viewLink}
             title="View Details"
             className="p-2 rounded-xl border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer"
           >
