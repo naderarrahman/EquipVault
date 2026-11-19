@@ -1,18 +1,21 @@
 import Image from "next/image"
 import Link from "next/link"
 import { MapPin, CheckCircle2, Clock, Eye, Edit3 } from "lucide-react"
+import DeleteEquipmentButton from "./DeleteEquipmentButton"
 import type { Equipment } from "@/types"
 
 interface EquipmentCardProps {
   item: Equipment
   showStatus?: boolean
   editHref?: string
+  showDelete?: boolean
 }
 
 export default function EquipmentCard({
   item,
   showStatus = false,
   editHref,
+  showDelete = false,
 }: EquipmentCardProps) {
   const isApproved = item.status?.toLowerCase() === "approved"
 
@@ -33,7 +36,7 @@ export default function EquipmentCard({
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-60" />
 
-          {/* Status Badge (Only shown if enabled) */}
+          {/* Status Badge */}
           {showStatus && item.status && (
             <span
               className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider backdrop-blur-md flex items-center gap-1.5 shadow-xs ${
@@ -115,6 +118,7 @@ export default function EquipmentCard({
           >
             <Eye className="size-4" />
           </Link>
+
           {editHref && (
             <Link
               href={editHref}
@@ -123,6 +127,13 @@ export default function EquipmentCard({
             >
               <Edit3 className="size-4" />
             </Link>
+          )}
+
+          {showDelete && (
+            <DeleteEquipmentButton
+              equipmentId={item._id}
+              equipmentName={item.name}
+            />
           )}
         </div>
       </div>

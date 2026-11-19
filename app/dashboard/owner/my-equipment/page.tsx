@@ -74,13 +74,14 @@ export default async function MyEquipmentPage() {
           </Link>
         </div>
       ) : (
-        /* Equipment Grid using Reusable EquipmentCard Component */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {equipments.map((item) => (
             <EquipmentCard
               key={item._id}
               item={item}
               showStatus={true}
+              editHref={`/dashboard/owner/edit-equipment/${item._id}`}
+              showDelete={true}
             />
           ))}
         </div>

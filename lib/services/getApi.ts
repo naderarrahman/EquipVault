@@ -67,3 +67,19 @@ export const getAllEquipmentApi = async (
   }
 }
 
+// Single equipment details by ID (for Edit Form & Details Page)
+export const getSingleEquipmentApi = async (
+  id: string
+): Promise<ApiResponse<Equipment>> => {
+  try {
+    const res = await authFetch(`/api/equipment/${id}`)
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching single equipment:", error)
+    return {
+      success: false,
+      message: "Failed to load equipment details.",
+    }
+  }
+}
+
