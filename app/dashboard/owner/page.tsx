@@ -11,6 +11,7 @@ import {
   UserCog,
 } from "lucide-react"
 import { getOwnerOverviewApi } from "@/lib/services/getApi"
+import AnalyticsBarChart from "@/components/dashboard/Shared/AnalyticsBarChart"
 
 export default async function OwnerOverviewPage() {
   const overviewRes = await getOwnerOverviewApi()
@@ -26,8 +27,14 @@ export default async function OwnerOverviewPage() {
     )
   }
 
-  const { equipment, bookings, revenue, recentBookings, recentEquipment } =
-    overviewRes.data
+  const {
+    equipment,
+    bookings,
+    revenue,
+    monthlyEarnings,
+    recentBookings,
+    recentEquipment,
+  } = overviewRes.data
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -122,6 +129,20 @@ export default async function OwnerOverviewPage() {
           </p>
         </div>
       </div>
+
+      {/* 6-Month Rental Earnings & Bookings Chart */}
+      <AnalyticsBarChart
+        title="Monthly Rental Earnings"
+        subtitle="Verified Stripe payouts and booking volume over the last 6 months"
+        primaryLabel="Earnings ($)"
+        secondaryLabel="Bookings"
+        valuePrefix="$"
+        data={(monthlyEarnings ?? []).map((m) => ({
+          month: m.month,
+          primaryValue: m.earnings,
+          secondaryValue: m.bookings,
+        }))}
+      />
 
       {/* Recent Bookings & Fleet Snapshot */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

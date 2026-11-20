@@ -17,6 +17,7 @@ import {
   getAllBookingsAdminApi,
   getAllEquipmentAdminApi,
 } from "@/lib/services/getApi"
+import AnalyticsBarChart from "@/components/dashboard/Shared/AnalyticsBarChart"
 
 export default async function AdminOverviewPage() {
   const [statsRes, equipmentRes, bookingsRes] = await Promise.all([
@@ -145,6 +146,20 @@ export default async function AdminOverviewPage() {
           </p>
         </div>
       </div>
+
+      {/* 6-Month Platform Revenue & Booking Chart */}
+      <AnalyticsBarChart
+        title="Monthly Bookings & Revenue Analytics"
+        subtitle="Last 6 months platform performance across all equipment"
+        primaryLabel="Revenue ($)"
+        secondaryLabel="Bookings"
+        valuePrefix="$"
+        data={(stats.monthlyStats ?? []).map((m) => ({
+          month: m.month,
+          primaryValue: m.revenue,
+          secondaryValue: m.bookings,
+        }))}
+      />
 
       {/* Platform Health Distribution Bars */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

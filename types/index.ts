@@ -222,6 +222,11 @@ export interface AdminDashboardStats {
     total: number
     transactionsCount: number
   }
+  monthlyStats?: Array<{
+    month: string
+    bookings: number
+    revenue: number
+  }>
 }
 
 
@@ -246,6 +251,11 @@ export interface OwnerDashboardOverview {
   }
   recentBookings: BookingRecord[]
   recentEquipment: Equipment[]
+  monthlyEarnings?: Array<{
+    month: string
+    earnings: number
+    bookings: number
+  }>
 }
 
 export interface CustomerDashboardOverview {
