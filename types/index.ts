@@ -273,3 +273,18 @@ export interface CustomerDashboardOverview {
   }
   recentBookings: BookingRecord[]
 }
+
+export interface HomeCategoryCount {
+  name: string
+  count: number
+}
+
+export interface HomePageData {
+  featuredEquipment: Equipment[]
+  categories: HomeCategoryCount[]
+  stats: {
+    approvedEquipmentCount: number
+    verifiedOwnersCount: number
+    totalBookingsCount: number
+  }
+}

@@ -1,5 +1,5 @@
 import { authFetch } from "@/lib/api"
-import { AdminDashboardStats, AdminUserRecord, ApiResponse, BookingRecord, CustomerDashboardOverview, Equipment, EquipmentFilterParams, OwnerDashboardOverview, PaymentRecord } from "@/types"
+import { AdminDashboardStats, AdminUserRecord, ApiResponse, BookingRecord, CustomerDashboardOverview, Equipment, EquipmentFilterParams, HomePageData, OwnerDashboardOverview, PaymentRecord } from "@/types"
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -214,9 +214,7 @@ export const getAllPaymentsAdminApi = async (): Promise<ApiResponse<PaymentRecor
 
 
 // Owner: Dashboard Overview Data
-export const getOwnerOverviewApi = async (): Promise<
-  ApiResponse<OwnerDashboardOverview>
-> => {
+export const getOwnerOverviewApi = async (): Promise<ApiResponse<OwnerDashboardOverview>> => {
   try {
     const res = await authFetch("/api/dashboard/owner-overview")
     return await res.json()
@@ -239,6 +237,29 @@ export const getCustomerOverviewApi = async (): Promise<ApiResponse<CustomerDash
     return {
       success: false,
       message: "Failed to load customer dashboard overview.",
+    }
+  }
+}
+
+export const getHomePageDataApi = async (): Promise<ApiResponse<HomePageData>> => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/marketplace/home-data`, {
+      cache: "no-store",
+    })
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: "Failed to fetch home page data.",
+      }
+    }
+
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching home page data:", error)
+    return {
+      success: false,
+      message: "Network error while fetching home page data.",
     }
   }
 }
