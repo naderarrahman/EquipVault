@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import Image from "next/image"
 import {
   User,
@@ -15,9 +15,15 @@ import {
   Loader2,
   CheckCircle2,
   KeyRound,
+  Phone,
+  MapPin,
 } from "lucide-react"
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
+import {
+  getProfileContactAction,
+  updateProfileContactAction,
+} from "@/actions/profile.actions"
 
 interface ProfileSettingsViewProps {
   fallbackRole?: "owner" | "customer" | "admin"
@@ -28,9 +34,13 @@ export default function ProfileSettingsView({
 }: ProfileSettingsViewProps) {
   const { data: session, isPending, refetch } = authClient.useSession()
 
-  // Draft states (null means fall back directly to live session values)
+  // Draft states (null means fall back directly to live session/server values)
   const [nameDraft, setNameDraft] = useState<string | null>(null)
   const [imageDraft, setImageDraft] = useState<string | null>(null)
+  const [savedPhone, setSavedPhone] = useState("")
+  const [savedAddress, setSavedAddress] = useState("")
+  const [phoneDraft, setPhoneDraft] = useState<string | null>(null)
+  const [addressDraft, setAddressDraft] = useState<string | null>(null)
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null)
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
 
@@ -42,6 +52,21 @@ export default function ProfileSettingsView({
   const [showNewPw, setShowNewPw] = useState(false)
   const [showConfirmPw, setShowConfirmPw] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+
+  useEffect(() => {
+    let isMounted = true
+
+    getProfileContactAction().then((res) => {
+      if (isMounted && res.success && res.data) {
+        setSavedPhone(res.data.phone || "")
+        setSavedAddress(res.data.address || "")
+      }
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   if (isPending) {
     return (
@@ -58,6 +83,8 @@ export default function ProfileSettingsView({
   const user = session?.user
   const name = nameDraft !== null ? nameDraft : user?.name || ""
   const imageUrl = imageDraft !== null ? imageDraft : user?.image || ""
+  const phone = phoneDraft !== null ? phoneDraft : savedPhone
+  const address = addressDraft !== null ? addressDraft : savedAddress
   const imgError = Boolean(imageUrl && failedImageUrl === imageUrl)
 
   const resolvedRole =
@@ -85,6 +112,8 @@ export default function ProfileSettingsView({
 
     const trimmedName = name.trim()
     const trimmedImage = imageUrl.trim()
+    const trimmedPhone = phone.trim()
+    const trimmedAddress = address.trim()
 
     if (!trimmedName) {
       toast.error("Display name cannot be empty.")
@@ -93,20 +122,38 @@ export default function ProfileSettingsView({
 
     try {
       setIsUpdatingProfile(true)
-      const { error } = await authClient.updateUser({
-        name: trimmedName,
-        image: trimmedImage || undefined,
-      })
 
-      if (error) {
-        toast.error(error.message || "Failed to update profile.")
+      const [authResult, contactResult] = await Promise.all([
+        authClient.updateUser({
+          name: trimmedName,
+          image: trimmedImage || undefined,
+        }),
+        updateProfileContactAction({
+          phone: trimmedPhone,
+          address: trimmedAddress,
+        }),
+      ])
+
+      if (authResult.error) {
+        toast.error(authResult.error.message || "Failed to update profile.")
+        return
+      }
+
+      if (!contactResult.success) {
+        toast.error(
+          contactResult.message || "Failed to update phone and address."
+        )
         return
       }
 
       await refetch()
+      setSavedPhone(trimmedPhone)
+      setSavedAddress(trimmedAddress)
       setNameDraft(null)
       setImageDraft(null)
-      toast.success("Profile updated successfully!")
+      setPhoneDraft(null)
+      setAddressDraft(null)
+      toast.success("Profile and contact details updated successfully!")
     } catch {
       toast.error("Something went wrong while updating profile.")
     } finally {
@@ -212,6 +259,26 @@ export default function ProfileSettingsView({
             <span className="font-medium text-foreground">{joinedDate}</span>
           </div>
 
+          <div className="flex items-center justify-between gap-2 text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 shrink-0">
+              <Phone className="size-3.5 text-primary" />
+              Phone
+            </span>
+            <span className="font-medium text-foreground truncate">
+              {savedPhone || "Not added"}
+            </span>
+          </div>
+
+          <div className="flex items-start justify-between gap-2 text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 shrink-0">
+              <MapPin className="size-3.5 text-primary" />
+              Address
+            </span>
+            <span className="font-medium text-foreground text-right line-clamp-2">
+              {savedAddress || "Not added"}
+            </span>
+          </div>
+
           {user?.id && (
             <div className="pt-2 border-t border-border/60">
               <span className="text-[11px] text-muted-foreground block mb-1">
@@ -227,7 +294,7 @@ export default function ProfileSettingsView({
 
       {/* Right Column: Edit Profile & Change Password Forms (8 Cols) */}
       <div className="lg:col-span-8 space-y-6">
-        {/* Card 1: Personal Information */}
+        {/* Card 1: Personal & Contact Information */}
         <form
           onSubmit={handleProfileUpdate}
           className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xs space-y-5"
@@ -235,10 +302,11 @@ export default function ProfileSettingsView({
           <div className="border-b border-border pb-4">
             <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
               <User className="size-4 text-primary" />
-              Personal Information
+              Personal &amp; Contact Information
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Update your public display name and profile avatar URL.
+              Update your display name, avatar URL, phone number, and contact
+              address.
             </p>
           </div>
 
@@ -276,27 +344,57 @@ export default function ProfileSettingsView({
                 />
               </div>
             </div>
-          </div>
 
-          {/* Profile Image URL */}
-          <div>
-            <label className="block text-xs font-semibold text-foreground mb-1.5">
-              Profile Photo URL
-            </label>
-            <div className="relative">
-              <Camera className="size-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageDraft(e.target.value)}
-                placeholder="https://example.com/your-avatar.jpg"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
+            {/* Phone Number */}
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1.5">
+                Phone Number
+              </label>
+              <div className="relative">
+                <Phone className="size-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhoneDraft(e.target.value)}
+                  placeholder="+880 1700-000000"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Paste a direct image link (ImgBB, Cloudinary, or Unsplash) for
-              instant preview.
-            </p>
+
+            {/* Profile Image URL */}
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1.5">
+                Profile Photo URL
+              </label>
+              <div className="relative">
+                <Camera className="size-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageDraft(e.target.value)}
+                  placeholder="https://example.com/your-avatar.jpg"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold text-foreground mb-1.5">
+                Address
+              </label>
+              <div className="relative">
+                <MapPin className="size-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddressDraft(e.target.value)}
+                  placeholder="House/Road, City, District"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end pt-2">
