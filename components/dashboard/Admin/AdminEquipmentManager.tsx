@@ -5,18 +5,27 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
+  AlertTriangle,
   CheckCircle2,
   Clock,
   Eye,
   Loader2,
   MapPin,
   Package,
+  Pencil,
   Search,
+  Trash2,
   User,
+  X,
   XCircle,
 } from "lucide-react"
 import { toast } from "sonner"
-import { updateEquipmentStatusAdminAction } from "@/actions/admin.actions"
+import {
+  deleteEquipmentAdminAction,
+  updateEquipmentAdminAction,
+  updateEquipmentStatusAdminAction,
+  type AdminEquipmentUpdatePayload,
+} from "@/actions/admin.actions"
 import type { Equipment, EquipmentApprovalStatus } from "@/types"
 
 interface AdminEquipmentManagerProps {
@@ -33,6 +42,15 @@ const filterTabs: Array<{
   { label: "Rejected", value: "rejected" },
 ]
 
+const STANDARD_CATEGORIES = [
+  "Construction Equipment",
+  "Photography Equipment",
+  "Vehicles & Transportation",
+  "Agriculture Equipment",
+  "Electronics",
+  "Event Equipment",
+] as const
+
 export default function AdminEquipmentManager({
   initialEquipments,
 }: AdminEquipmentManagerProps) {
@@ -43,6 +61,11 @@ export default function AdminEquipmentManager({
   )
   const [searchQuery, setSearchQuery] = useState("")
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+
+  const [editTarget, setEditTarget] = useState<Equipment | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Equipment | null>(null)
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const stats = useMemo(() => {
     const total = equipments.length
@@ -62,8 +85,7 @@ export default function AdminEquipmentManager({
   const filteredEquipments = useMemo(() => {
     return equipments.filter((item) => {
       const normalizedStatus = (item.status || "pending").toLowerCase()
-      const matchesTab =
-        activeTab === "all" || normalizedStatus === activeTab
+      const matchesTab = activeTab === "all" || normalizedStatus === activeTab
 
       const keyword = searchQuery.trim().toLowerCase()
       const matchesSearch =
@@ -252,8 +274,8 @@ export default function AdminEquipmentManager({
                           status === "approved"
                             ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
                             : status === "rejected"
-                            ? "bg-destructive/15 text-destructive border-destructive/30"
-                            : "bg-amber-500/15 text-amber-500 border-amber-500/30"
+                              ? "bg-destructive/15 text-destructive border-destructive/30"
+                              : "bg-amber-500/15 text-amber-500 border-amber-500/30"
                         }`}
                       >
                         {status}
@@ -292,10 +314,10 @@ export default function AdminEquipmentManager({
                   </div>
                 </div>
 
-                {/* Right: Moderation Buttons */}
+                {/* Right: Moderation & CRUD Buttons */}
                 <div className="flex flex-wrap items-center gap-2 pt-3 lg:pt-0 border-t lg:border-t-0 border-border shrink-0">
                   <Link
-                    href={`/equipment/${item._id}`}
+                    href={`/dashboard/admin/equipment/${item._id}`}
                     title="Preview Listing"
                     className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-background hover:bg-muted text-xs font-medium text-foreground transition"
                   >
@@ -330,10 +352,285 @@ export default function AdminEquipmentManager({
                       Reject
                     </button>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() => setEditTarget(item)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-background hover:bg-muted text-xs font-medium text-foreground transition cursor-pointer"
+                  >
+                    <Pencil className="size-3.5 text-primary" />
+                    Edit
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(item)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-destructive/30 bg-background hover:bg-destructive hover:text-destructive-foreground text-destructive text-xs font-medium transition cursor-pointer"
+                  >
+                    <Trash2 className="size-3.5" />
+                    Delete
+                  </button>
                 </div>
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Admin Quick Edit Modal */}
+      {editTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              try {
+                setIsSavingEdit(true)
+                const rawStatus = String(
+                  formData.get("status") || editTarget.status || "pending"
+                ).toLowerCase()
+                const validStatus: EquipmentApprovalStatus =
+                  rawStatus === "approved" || rawStatus === "rejected"
+                    ? rawStatus
+                    : "pending"
+
+                const payload: AdminEquipmentUpdatePayload = {
+                  name: String(formData.get("name") || editTarget.name),
+                  category: String(
+                    formData.get("category") || editTarget.category
+                  ) as Equipment["category"],
+                  location: String(
+                    formData.get("location") || editTarget.location
+                  ),
+                  rentalPrice: Number(
+                    formData.get("rentalPrice") || editTarget.rentalPrice
+                  ),
+                  rentalType: String(
+                    formData.get("rentalType") || editTarget.rentalType
+                  ) as Equipment["rentalType"],
+                  availableQuantity: Number(
+                    formData.get("availableQuantity") ||
+                      editTarget.availableQuantity
+                  ),
+                  status: validStatus,
+                }
+
+                const res = await updateEquipmentAdminAction(
+                  editTarget._id,
+                  payload
+                )
+                if (!res.success) {
+                  toast.error(res.message || "Update failed.")
+                  return
+                }
+
+                setEquipments((prev) =>
+                  prev.map((eq) =>
+                    eq._id === editTarget._id ? { ...eq, ...payload } : eq
+                  )
+                )
+                toast.success("Equipment updated successfully.")
+                setEditTarget(null)
+                router.refresh()
+              } finally {
+                setIsSavingEdit(false)
+              }
+            }}
+            className="bg-card border border-border rounded-2xl w-full max-w-lg p-6 shadow-xl space-y-4"
+          >
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-base font-bold text-foreground">
+                Edit Equipment Listing
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditTarget(null)}
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="sm:col-span-2 space-y-1">
+                <label className="font-semibold text-foreground">
+                  Equipment Name
+                </label>
+                <input
+                  name="name"
+                  defaultValue={editTarget.name}
+                  required
+                  className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-foreground">Category</label>
+                <select
+                  name="category"
+                  defaultValue={editTarget.category}
+                  className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground"
+                >
+                  {STANDARD_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                  {!STANDARD_CATEGORIES.includes(
+                    editTarget.category as (typeof STANDARD_CATEGORIES)[number]
+                  ) && (
+                    <option value={editTarget.category}>
+                      {editTarget.category}
+                    </option>
+                  )}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-foreground">Location</label>
+                <input
+                  name="location"
+                  defaultValue={editTarget.location}
+                  required
+                  className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-foreground">
+                  Rental Price ($)
+                </label>
+                <input
+                  name="rentalPrice"
+                  type="number"
+                  min={1}
+                  defaultValue={editTarget.rentalPrice}
+                  required
+                  className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-foreground">
+                  Available Qty
+                </label>
+                <input
+                  name="availableQuantity"
+                  type="number"
+                  min={0}
+                  defaultValue={editTarget.availableQuantity}
+                  required
+                  className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-foreground">
+                  Rental Type
+                </label>
+                <select
+                  name="rentalType"
+                  defaultValue={editTarget.rentalType}
+                  className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground"
+                >
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-foreground">
+                  Listing Status
+                </label>
+                <select
+                  name="status"
+                  defaultValue={(editTarget.status || "pending").toLowerCase()}
+                  className="w-full px-3 py-2 rounded-xl border border-input bg-background text-foreground"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-3 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setEditTarget(null)}
+                className="px-4 py-2 rounded-xl border border-border text-xs font-medium cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSavingEdit}
+                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-60 cursor-pointer"
+              >
+                {isSavingEdit ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Admin Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6 shadow-xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center">
+                <AlertTriangle className="size-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-foreground">
+                  Delete Equipment Listing?
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  This will permanently remove &ldquo;{deleteTarget.name}&rdquo;.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 rounded-xl border border-border text-xs font-medium cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={async () => {
+                  try {
+                    setIsDeleting(true)
+                    const res = await deleteEquipmentAdminAction(
+                      deleteTarget._id
+                    )
+                    if (!res.success) {
+                      toast.error(res.message || "Delete failed.")
+                      return
+                    }
+                    setEquipments((prev) =>
+                      prev.filter((eq) => eq._id !== deleteTarget._id)
+                    )
+                    toast.success("Equipment deleted.")
+                    setDeleteTarget(null)
+                    router.refresh()
+                  } finally {
+                    setIsDeleting(false)
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-destructive text-destructive-foreground text-xs font-semibold hover:bg-destructive/90 disabled:opacity-60 cursor-pointer"
+              >
+                {isDeleting ? "Deleting..." : "Confirm Delete"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

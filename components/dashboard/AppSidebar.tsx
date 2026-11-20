@@ -140,13 +140,13 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
             <SidebarMenu className="space-y-1">
               {currentMenu.items.map((item) => {
                 const isRootRoleRoute =
-                  item.href === "/dashboard/user" ||
+                  item.href === "/dashboard/customer" ||
                   item.href === "/dashboard/owner" ||
                   item.href === "/dashboard/admin"
 
                 const isActive = isRootRoleRoute
                   ? pathname === item.href
-                  : pathname.startsWith(item.href)
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`)
 
                 return (
                   <SidebarMenuItem key={item.href}>
