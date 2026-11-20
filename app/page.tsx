@@ -1,6 +1,8 @@
 import HeroSection from "@/components/home/HeroSection"
 import FeaturedEquipmentSection from "@/components/home/FeaturedEquipmentSection"
 import CategoriesSection from "@/components/home/CategoriesSection"
+import WhyChooseUsSection from "@/components/home/WhyChooseUsSection"
+import HowItWorksSection from "@/components/home/HowItWorksSection"
 import { getHomePageDataApi } from "@/lib/services/getApi"
 
 export default async function HomePage() {
@@ -14,6 +16,8 @@ export default async function HomePage() {
       <HeroSection />
       <FeaturedEquipmentSection equipments={featuredEquipments} />
       <CategoriesSection categories={categories} />
+      <WhyChooseUsSection />
+      <HowItWorksSection />
     </main>
   )
 }
