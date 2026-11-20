@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import Navbar from "@/components/layout/Navbar"
+import Footer from "@/components/layout/Footer"
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -48,6 +49,7 @@ export default function RootLayout({
         <ThemeProvider>
           <Navbar/>
           {children}
+          <Footer />
           <Toaster position="top-right" richColors closeButton />
         </ThemeProvider>
       </body>
