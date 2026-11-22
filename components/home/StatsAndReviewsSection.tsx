@@ -11,26 +11,7 @@ import {
   Quote,
   ArrowUpRight,
 } from "lucide-react"
-
-interface PlatformStats {
-  totalEquipment?: number
-  totalOwners?: number
-  verifiedOwners?: number
-  completedBookings?: number
-  totalBookings?: number
-  averageRating?: number
-}
-
-interface ReviewItem {
-  _id: string
-  equipmentId?: string
-  equipmentName?: string
-  category?: string
-  customerName: string
-  rating: number
-  comment: string
-  createdAt?: string
-}
+import type { PlatformStats, ReviewItem } from "@/types"
 
 interface StatsAndReviewsSectionProps {
   stats?: PlatformStats
@@ -49,7 +30,7 @@ const FALLBACK_REVIEWS: ReviewItem[] = [
   },
   {
     _id: "fallback-2",
-    equipmentName: "Sony FX6 Full-Frame Cinema Rig",
+    equipmentName: "Sony FX6 Full-Frame Cinema Camera",
     category: "Photography Equipment",
     customerName: "Mahmudul Karim",
     rating: 5,
@@ -58,38 +39,60 @@ const FALLBACK_REVIEWS: ReviewItem[] = [
   },
   {
     _id: "fallback-3",
-    equipmentName: "JBL Line-Array Event PA System",
+    equipmentName: "JBL EON715 Line-Array PA Sound System",
     category: "Event Equipment",
     customerName: "Nusrat Jahan",
     rating: 5,
     comment:
       "Rented full stage audio and wireless mics for our university tech summit. Crystal clear sound, fast owner approval, and zero hidden rental fees.",
   },
+  {
+    _id: "fallback-4",
+    equipmentName: "John Deere 5050D 4WD Tractor",
+    category: "Agriculture Equipment",
+    customerName: "Rafiul Islam",
+    rating: 5,
+    comment:
+      "Reliable 4WD tractor with strong pulling power for heavy field work. Smooth handover and transparent pricing made the whole rental effortless.",
+  },
 ]
 
 export default function StatsAndReviewsSection({
   stats,
-  reviews,
+  reviews = [],
 }: StatsAndReviewsSectionProps) {
+  const validReviews = Array.isArray(reviews) ? reviews : []
+
   const displayReviews =
-    reviews && reviews.length > 0 ? reviews.slice(0, 3) : FALLBACK_REVIEWS
+    validReviews.length >= 4
+      ? validReviews.slice(0, 4)
+      : validReviews.length > 0
+      ? [
+          ...validReviews,
+          ...FALLBACK_REVIEWS.slice(0, 4 - validReviews.length),
+        ]
+      : FALLBACK_REVIEWS
 
   const statCards = [
     {
       label: "Verified Equipment",
-      value: `${stats?.totalEquipment && stats.totalEquipment > 0 ? stats.totalEquipment : 24}+`,
+      value: `${
+        stats?.totalEquipment && stats.totalEquipment > 0
+          ? stats.totalEquipment
+          : 12
+      }+`,
       subtext: "Admin-inspected listings",
       icon: Package,
     },
     {
       label: "Trusted Owners",
-      value: `${stats?.verifiedOwners || stats?.totalOwners || 12}+`,
+      value: `${stats?.verifiedOwners || stats?.totalOwners || 2}+`,
       subtext: "Identity & gear verified",
       icon: Users,
     },
     {
       label: "Completed Rentals",
-      value: `${stats?.completedBookings || stats?.totalBookings || 85}+`,
+      value: `${stats?.completedBookings || stats?.totalBookings || 4}+`,
       subtext: "Delivered on schedule",
       icon: CheckCircle2,
     },
@@ -98,7 +101,7 @@ export default function StatsAndReviewsSection({
       value:
         stats?.averageRating && stats.averageRating > 0
           ? `${stats.averageRating.toFixed(1)}/5`
-          : "4.9/5",
+          : "5.0/5",
       subtext: "From verified renters",
       icon: Star,
     },
@@ -167,7 +170,7 @@ export default function StatsAndReviewsSection({
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {displayReviews.map((review, index) => {
               const initials = (review.customerName || "VR")
                 .split(" ")
@@ -183,9 +186,9 @@ export default function StatsAndReviewsSection({
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.15 }}
                   transition={{ duration: 0.4, delay: index * 0.08 }}
-                  className="bg-card border border-border hover:border-primary/40 rounded-2xl p-6 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between gap-6"
+                  className="bg-card border border-border hover:border-primary/40 rounded-2xl p-5 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between gap-5"
                 >
-                  <div className="space-y-4">
+                  <div className="space-y-3.5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         {[1, 2, 3, 4, 5].map((star) => (
@@ -199,15 +202,15 @@ export default function StatsAndReviewsSection({
                           />
                         ))}
                       </div>
-                      <Quote className="size-5 text-primary/40" />
+                      <Quote className="size-4 text-primary/40" />
                     </div>
 
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-5">
                       &ldquo;{review.comment}&rdquo;
                     </p>
                   </div>
 
-                  <div className="space-y-3.5 pt-4 border-t border-border">
+                  <div className="space-y-3 pt-3.5 border-t border-border">
                     {review.equipmentName &&
                       (review.equipmentId ? (
                         <Link

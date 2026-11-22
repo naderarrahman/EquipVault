@@ -1,5 +1,18 @@
 import { authFetch } from "@/lib/api"
-import { AdminDashboardStats, AdminUserRecord, ApiResponse, BookingRecord, CustomerDashboardOverview, Equipment, EquipmentFilterParams, EquipmentReviewsResponse, HomePageData, OwnerDashboardOverview, PaymentRecord } from "@/types"
+import {
+  AdminDashboardStats,
+  AdminUserRecord,
+  ApiResponse,
+  BookingRecord,
+  CustomerDashboardOverview,
+  Equipment,
+  EquipmentFilterParams,
+  EquipmentReviewsResponse,
+  HomePageData,
+  OwnerDashboardOverview,
+  PaymentRecord,
+  ReviewItem,
+} from "@/types"
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -153,7 +166,7 @@ export const getAdminStatsApi = async (): Promise<ApiResponse<AdminDashboardStat
 }
 
 // Admin: Get All Users
-export const getAllUsersAdminApi = async (): Promise< ApiResponse<AdminUserRecord[]>> => {
+export const getAllUsersAdminApi = async (): Promise<ApiResponse<AdminUserRecord[]>> => {
   try {
     const res = await authFetch("/api/admin/users")
     return await res.json()
@@ -212,7 +225,6 @@ export const getAllPaymentsAdminApi = async (): Promise<ApiResponse<PaymentRecor
   }
 }
 
-
 // Owner: Dashboard Overview Data
 export const getOwnerOverviewApi = async (): Promise<ApiResponse<OwnerDashboardOverview>> => {
   try {
@@ -260,6 +272,46 @@ export const getHomePageDataApi = async (): Promise<ApiResponse<HomePageData>> =
     return {
       success: false,
       message: "Network error while fetching home page data.",
+    }
+  }
+}
+
+// Public: Fetch latest verified customer reviews for homepage
+export const getLatestReviewsApi = async (
+  limit = 4
+): Promise<ApiResponse<ReviewItem[]>> => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/reviews?limit=${limit}`, {
+      cache: "no-store",
+    })
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: "Failed to load customer reviews.",
+        data: [],
+      }
+    }
+
+    const payload = await res.json()
+    const reviews: ReviewItem[] = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+      ? payload.data
+      : Array.isArray(payload?.reviews)
+      ? payload.reviews
+      : []
+
+    return {
+      success: true,
+      data: reviews,
+    }
+  } catch (error) {
+    console.error("Error fetching latest reviews:", error)
+    return {
+      success: false,
+      message: "Network error while fetching customer reviews.",
+      data: [],
     }
   }
 }

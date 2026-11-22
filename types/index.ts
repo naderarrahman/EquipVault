@@ -12,6 +12,7 @@ export type EquipmentCategory =
 export type RentalType = "Daily" | "Weekly" | "Monthly"
 
 export type EquipmentStatus = "pending" | "approved" | "rejected"
+export type EquipmentApprovalStatus = "pending" | "approved" | "rejected"
 
 export interface UserProfile {
   id: string
@@ -101,7 +102,12 @@ export interface EquipmentFilterParams {
   status?: string
 }
 
-export type BookingStatus = "pending" | "approved" | "rejected" | "completed" | "cancelled"
+export type BookingStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "completed"
+  | "cancelled"
 
 export type PaymentStatus = "unpaid" | "paid"
 
@@ -132,39 +138,18 @@ export interface BookingRecord extends CreateBookingPayload {
   totalAmount: number
   bookingStatus: BookingStatus
   paymentStatus: PaymentStatus
-  createdAt: string
-  updatedAt?: string
+  transactionId?: string
+  paidAt?: string
   hasReviewed?: boolean
   reviewId?: string
+  createdAt: string
+  updatedAt?: string
 }
 
 export interface FavoriteToggleResponse {
   success: boolean
   isFavorite: boolean
   message: string
-}
-
-export interface BookingRecord extends CreateBookingPayload {
-  _id: string
-  equipmentName: string
-  equipmentImage: string
-  rentalType: RentalType
-  unitPrice: number
-  ownerId: string
-  ownerName: string
-  ownerEmail: string
-  customerId: string
-  customerName: string
-  customerEmail: string
-  durationDays: number
-  billingUnits: number
-  totalAmount: number
-  bookingStatus: BookingStatus
-  paymentStatus: PaymentStatus
-  transactionId?: string
-  paidAt?: string
-  createdAt: string
-  updatedAt?: string
 }
 
 export interface PaymentRecord {
@@ -191,9 +176,6 @@ export interface CheckoutSessionResponse {
   sessionId?: string
   message?: string
 }
-
-
-export type EquipmentApprovalStatus = "pending" | "approved" | "rejected"
 
 export interface AdminUserRecord {
   _id?: string
@@ -232,7 +214,6 @@ export interface AdminDashboardStats {
     revenue: number
   }>
 }
-
 
 export interface OwnerDashboardOverview {
   equipment: {
@@ -283,14 +264,34 @@ export interface HomeCategoryCount {
   count: number
 }
 
+export interface PlatformStats {
+  approvedEquipmentCount?: number
+  verifiedOwnersCount?: number
+  totalBookingsCount?: number
+  totalEquipment?: number
+  totalOwners?: number
+  verifiedOwners?: number
+  completedBookings?: number
+  totalBookings?: number
+  averageRating?: number
+}
+
+export interface ReviewItem {
+  _id: string
+  equipmentId?: string
+  equipmentName?: string
+  category?: string
+  customerName: string
+  rating: number
+  comment: string
+  createdAt?: string
+}
+
 export interface HomePageData {
   featuredEquipment: Equipment[]
   categories: HomeCategoryCount[]
-  stats: {
-    approvedEquipmentCount: number
-    verifiedOwnersCount: number
-    totalBookingsCount: number
-  }
+  stats?: PlatformStats
+  reviews?: ReviewItem[]
 }
 
 export interface ReviewRecord {
