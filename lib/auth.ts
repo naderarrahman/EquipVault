@@ -4,17 +4,23 @@ import { mongodbAdapter } from "@better-auth/mongo-adapter"
 
 const mongoUri = process.env.MONGODB_URI as string
 
+if (!mongoUri) {
+  throw new Error("MONGODB_URI is missing in environment variables")
+}
+
 const globalForMongo = globalThis as unknown as {
   mongoClient?: MongoClient
 }
 
-const client = globalForMongo.mongoClient ?? new MongoClient(mongoUri, {
-  maxPoolSize: 10,
-  serverSelectionTimeoutMS: 5000,
-})
+if (!globalForMongo.mongoClient) {
+  globalForMongo.mongoClient = new MongoClient(mongoUri, {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 15000, 
+    socketTimeoutMS: 45000,
+  })
+}
 
-globalForMongo.mongoClient = client
-
+const client = globalForMongo.mongoClient
 const db = client.db("EquipVault")
 
 const trustedOrigins = [
