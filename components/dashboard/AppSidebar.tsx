@@ -103,9 +103,9 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/80 bg-card">
+    <Sidebar collapsible="icon" className="border-r border-border/80 bg-background shadow-xl z-50">
       {/* Brand Header */}
-      <SidebarHeader className="h-16 justify-center border-b border-border/80 px-2.5">
+      <SidebarHeader className="h-16 justify-center border-b border-border/80 px-2.5 bg-background">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -131,7 +131,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
       </SidebarHeader>
 
       {/* Main Navigation */}
-      <SidebarContent className="px-2 py-4 gap-4">
+      <SidebarContent className="px-2 py-4 gap-4 bg-background">
         <SidebarGroup className="p-0">
           <SidebarGroupLabel className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/75">
             {currentMenu.label}
@@ -156,7 +156,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                       onClick={() => router.push(item.href)}
                       className={`h-10 rounded-lg px-3 cursor-pointer transition-all ${
                         isActive
-                          ? "bg-primary/12 text-primary font-semibold border border-primary/20 hover:bg-primary/15 hover:text-primary"
+                          ? "bg-primary/10 text-primary font-semibold border border-primary/20 hover:bg-primary/15 hover:text-primary"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
                       }`}
                     >
@@ -213,7 +213,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
       </SidebarContent>
 
       {/* Bottom User Profile Card */}
-      <SidebarFooter className="border-t border-border/80 p-3">
+      <SidebarFooter className="border-t border-border/80 p-3 bg-background">
         <div className="flex items-center gap-2.5 rounded-xl border border-border/80 bg-muted/40 p-2 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center">
           {user.image ? (
             <Image
