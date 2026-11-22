@@ -7,42 +7,51 @@ import {
   CreditCard,
   Truck,
   Award,
+  CheckCircle2,
 } from "lucide-react"
 
 const FEATURES = [
   {
+    code: "01",
     title: "Admin-Verified Equipment",
     description:
       "Every machine, camera rig, and vehicle goes through admin approval and owner verification before appearing in the catalog.",
     icon: ShieldCheck,
     badge: "Quality Assured",
+    accentBg: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   },
   {
+    code: "02",
     title: "Flexible Rental Plans",
     description:
       "Rent only for the exact duration you need—daily sprints, weekly job sites, or monthly production cycles with clear rates.",
     icon: CalendarRange,
     badge: "Daily • Weekly • Monthly",
+    accentBg: "bg-blue-500/10 text-blue-500 border-blue-500/20",
   },
   {
+    code: "03",
     title: "Transparent Stripe Checkout",
     description:
       "Upfront pricing with instant availability checks, clear unit counts, and secure Stripe payment processing without hidden fees.",
     icon: CreditCard,
     badge: "Secure Payments",
+    accentBg: "bg-primary/10 text-primary border-primary/20",
   },
   {
+    code: "04",
     title: "Reliable Local Availability",
     description:
       "Connect directly with verified local owners and regional hubs so your gear is ready without long cross-country delays.",
     icon: Truck,
     badge: "Fast Turnaround",
+    accentBg: "bg-amber-500/10 text-amber-500 border-amber-500/20",
   },
 ]
 
 export default function WhyChooseUsSection() {
   return (
-    <section className="py-16 md:py-24 bg-background border-b border-border">
+    <section className="py-20 md:py-24 bg-background border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Section Header */}
         <motion.div
@@ -83,11 +92,21 @@ export default function WhyChooseUsSection() {
                   delay: index * 0.07,
                   ease: "easeOut",
                 }}
-                className="bg-card border border-border hover:border-primary/45 rounded-2xl p-6 shadow-2xs transition-all duration-300 flex flex-col justify-between gap-5"
+                className="group relative overflow-hidden bg-card border border-border hover:border-primary/45 rounded-2xl p-6 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-6"
               >
+                {/* Top Subtle Accent Line */}
+                <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
                 <div className="space-y-4">
-                  <div className="size-12 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center">
-                    <Icon className="size-6" />
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={`size-12 rounded-2xl border flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${feature.accentBg}`}
+                    >
+                      <Icon className="size-6" />
+                    </div>
+                    <span className="text-xs font-mono font-bold text-muted-foreground/50 group-hover:text-primary transition">
+                      /{feature.code}
+                    </span>
                   </div>
 
                   <div className="space-y-2">
@@ -100,7 +119,8 @@ export default function WhyChooseUsSection() {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-border/70">
+                <div className="pt-3.5 border-t border-border/70 flex items-center gap-1.5">
+                  <CheckCircle2 className="size-3.5 text-primary shrink-0" />
                   <span className="text-[11px] font-mono uppercase tracking-wider text-primary font-semibold">
                     {feature.badge}
                   </span>

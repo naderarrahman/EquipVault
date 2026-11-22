@@ -11,12 +11,18 @@ import {
   FileText,
   AlertCircle,
   Layers,
+  Star,
 } from "lucide-react"
-import { checkFavoriteApi, getSingleEquipmentApi } from "@/lib/services/getApi"
+import {
+  checkFavoriteApi,
+  getEquipmentReviewsApi,
+  getSingleEquipmentApi,
+} from "@/lib/services/getApi"
 import {
   EquipmentPrivateRouteGuard,
   RoleAwareEquipmentActions,
 } from "@/components/ProductCard/EquipmentDetailsRoleGuard"
+import EquipmentReviewsSection from "@/components/ProductCard/EquipmentReviewsSection"
 
 interface EquipmentDetailsPageProps {
   params: Promise<{ id: string }>
@@ -27,9 +33,10 @@ export default async function EquipmentDetailsPage({
 }: EquipmentDetailsPageProps) {
   const { id } = await params
 
-  const [response, favoriteRes] = await Promise.all([
+  const [response, favoriteRes, reviewsRes] = await Promise.all([
     getSingleEquipmentApi(id),
     checkFavoriteApi(id),
+    getEquipmentReviewsApi(id),
   ])
 
   if (!response.success || !response.data) {
@@ -60,6 +67,9 @@ export default async function EquipmentDetailsPage({
 
   const equipment = response.data
   const isAvailable = equipment.availableQuantity > 0
+  const averageRating =
+    reviewsRes.averageRating || equipment.averageRating || 0
+  const totalReviews = reviewsRes.totalReviews || equipment.reviewCount || 0
 
   return (
     <EquipmentPrivateRouteGuard>
@@ -150,19 +160,28 @@ export default async function EquipmentDetailsPage({
           {/* Right Column: Pricing, Role-Aware Actions & Owner Info (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-card border border-border rounded-2xl p-6 space-y-6 shadow-2xs">
-              <div className="space-y-2">
-                <span
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    isAvailable
-                      ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/25"
-                      : "bg-destructive/15 text-destructive border border-destructive/25"
-                  }`}
-                >
-                  <PackageCheck className="size-3.5" />
-                  {isAvailable
-                    ? `In Stock (${equipment.availableQuantity} available)`
-                    : "Currently Out of Stock"}
-                </span>
+              <div className="space-y-2.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                      isAvailable
+                        ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/25"
+                        : "bg-destructive/15 text-destructive border border-destructive/25"
+                    }`}
+                  >
+                    <PackageCheck className="size-3.5" />
+                    {isAvailable
+                      ? `In Stock (${equipment.availableQuantity} available)`
+                      : "Currently Out of Stock"}
+                  </span>
+
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25">
+                    <Star className="size-3.5 fill-current" />
+                    {totalReviews > 0
+                      ? `${averageRating.toFixed(1)} (${totalReviews})`
+                      : "No ratings yet"}
+                  </span>
+                </div>
 
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
                   {equipment.name}
@@ -225,6 +244,13 @@ export default async function EquipmentDetailsPage({
             </div>
           </div>
         </div>
+
+        {/* Customer Reviews Section */}
+        <EquipmentReviewsSection
+          reviews={reviewsRes.data || []}
+          averageRating={averageRating}
+          totalReviews={totalReviews}
+        />
       </div>
     </EquipmentPrivateRouteGuard>
   )

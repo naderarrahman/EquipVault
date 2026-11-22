@@ -75,6 +75,8 @@ export interface Equipment extends CreateEquipmentPayload {
   ownerEmail?: string
   createdAt?: string
   updatedAt?: string
+  averageRating?: number
+  reviewCount?: number
 }
 
 export interface ApiResponse<T> {
@@ -132,6 +134,8 @@ export interface BookingRecord extends CreateBookingPayload {
   paymentStatus: PaymentStatus
   createdAt: string
   updatedAt?: string
+  hasReviewed?: boolean
+  reviewId?: string
 }
 
 export interface FavoriteToggleResponse {
@@ -287,4 +291,35 @@ export interface HomePageData {
     verifiedOwnersCount: number
     totalBookingsCount: number
   }
+}
+
+export interface ReviewRecord {
+  _id: string
+  bookingId: string
+  equipmentId: string
+  equipmentName: string
+  equipmentImage?: string
+  category?: string
+  customerId: string
+  customerName: string
+  customerEmail?: string
+  customerImage?: string
+  rating: number
+  comment: string
+  createdAt: string
+}
+
+export interface CreateReviewPayload {
+  bookingId: string
+  equipmentId: string
+  rating: number
+  comment: string
+}
+
+export interface EquipmentReviewsResponse {
+  success: boolean
+  message?: string
+  averageRating: number
+  totalReviews: number
+  data: ReviewRecord[]
 }

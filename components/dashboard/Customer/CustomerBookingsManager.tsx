@@ -27,6 +27,7 @@ import {
 import { toast } from "sonner"
 import { cancelMyBookingAction } from "@/actions/booking.actions"
 import { createCheckoutSessionAction } from "@/actions/payment.actions"
+import LeaveReviewButton from "@/components/reviews/LeaveReviewButton"
 import type { BookingRecord, BookingStatus } from "@/types"
 
 interface CustomerBookingsManagerProps {
@@ -96,23 +97,7 @@ export default function CustomerBookingsManager({
         return
       }
 
-      const handlePayNow = async (bookingId: string) => {
-    try {
-      setPayingBookingId(bookingId)
-      const checkoutRes = await createCheckoutSessionAction(bookingId)
-
-      if (!checkoutRes.success || !checkoutRes.url) {
-        toast.error(checkoutRes.message || "Could not start Stripe payment.")
-        setPayingBookingId(null)
-        return
-      }
-
       window.location.assign(checkoutRes.url)
-    } catch {
-      toast.error("Something went wrong while initiating payment.")
-      setPayingBookingId(null)
-    }
-  }
     } catch {
       toast.error("Something went wrong while initiating payment.")
       setPayingBookingId(null)
@@ -394,7 +379,7 @@ export default function CustomerBookingsManager({
                   )}
                 </div>
 
-                {/* Right: Total Amount, Pay Now & Cancel Action */}
+                {/* Right: Total Amount, Pay Now, Review & Cancel Action */}
                 <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-border shrink-0">
                   <div className="lg:text-right">
                     <span className="text-[11px] text-muted-foreground block">
@@ -428,6 +413,8 @@ export default function CustomerBookingsManager({
                           )}
                         </button>
                       )}
+
+                    <LeaveReviewButton booking={booking} />
 
                     {booking.bookingStatus === "pending" && (
                       <button
