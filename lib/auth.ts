@@ -8,11 +8,12 @@ const globalForMongo = globalThis as unknown as {
   mongoClient?: MongoClient
 }
 
-const client = globalForMongo.mongoClient ?? new MongoClient(mongoUri)
+const client = globalForMongo.mongoClient ?? new MongoClient(mongoUri, {
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+})
 
-if (process.env.NODE_ENV !== "production") {
-  globalForMongo.mongoClient = client
-}
+globalForMongo.mongoClient = client
 
 const db = client.db("EquipVault")
 
