@@ -16,7 +16,7 @@
 
 ## 📸 Platform Overview
 
-![EquipVault Platform Overview](./public/overview/overview.jpeg)
+![EquipVault Platform Overview](./public/overview/overview.jpg)
 
 ---
 
