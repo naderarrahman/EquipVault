@@ -15,8 +15,13 @@ const globalForMongo = globalThis as unknown as {
 if (!globalForMongo.mongoClient) {
   globalForMongo.mongoClient = new MongoClient(mongoUri, {
     maxPoolSize: 10,
-    serverSelectionTimeoutMS: 15000, 
+    minPoolSize: 0,
+    maxIdleTimeMS: 30000,
+    serverSelectionTimeoutMS: 15000,
+    connectTimeoutMS: 15000,
     socketTimeoutMS: 45000,
+    retryReads: true,
+    retryWrites: true,
   })
 }
 
@@ -33,8 +38,14 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins,
   database: mongodbAdapter(db, {
-    client, 
+    client,
   }),
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 5, 
+    },
+  },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 6,
