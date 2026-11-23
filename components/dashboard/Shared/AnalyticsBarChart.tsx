@@ -80,7 +80,7 @@ function ChartTooltip({
                 className="size-2 rounded-full"
                 style={{
                   backgroundColor: isPrimary
-                    ? "hsl(var(--primary))"
+                    ? "var(--primary)"
                     : "#10b981",
                 }}
               />
@@ -146,23 +146,23 @@ export default function AnalyticsBarChart({
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="hsl(var(--border))"
+                stroke="var(--border)"
                 opacity={0.6}
               />
               <XAxis
                 dataKey="month"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
                 tickFormatter={(val: number) => `${valuePrefix}${val}`}
               />
               <Tooltip
-                cursor={{ fill: "hsl(var(--muted))", opacity: 0.35 }}
+                cursor={{ fill: "var(--muted)", opacity: 0.35 }}
                 content={
                   <ChartTooltip
                     valuePrefix={valuePrefix}
@@ -174,7 +174,7 @@ export default function AnalyticsBarChart({
               <Bar
                 dataKey="primaryValue"
                 name={primaryLabel}
-                fill="hsl(var(--primary))"
+                fill="var(--primary)"
                 radius={[6, 6, 0, 0]}
                 maxBarSize={38}
               />
